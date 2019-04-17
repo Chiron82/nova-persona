@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Final Project</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <script src="http://cdn.leafletjs.com/leaflet/v1.4.0/leaflet.js"></script>
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v1.4.0/leaflet.css" />
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000;
+            font-family: Lato, sans-serif;
+            color: #0D0000;
+        }
+        header {
+            padding: 6px 10%;
+        }
+        h1 {
+            display: inline-block;
+            margin-right: 20px;
+            color: #adff2f;
+        }
+        h2 {
+            display: inline-block;
+            color: #adff2f;
+        }
+        #map {
+            width: 80%;
+            height: 540px;
+            margin: 10px auto;
+        }
+        footer {
+            padding: 6px 10%;
+            width: 80%;
+        }
+        p {
+            font-size: 1em;
+            color:  #adff2f;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Crime in Philadelphia: </h1>
+        <h2><i>Gun Violence</i></h2>
+    </header>
+
+    <div id='map'></div>
+
+    <footer>
+        <p>Map authored by Thomas J. Stewart</p>
+        <p>This map shows three types of violent crime data related to gun violence. The categories include homocide, robbery, and aggravated assault.  </p>
+    </footer>
+
+    <script src="shootings.geojson"></script>
+    <script>
+
+       var map = L.map('map', {
+          center: [39.9526 , -75.1652],
+          zoom: 11,
+      });
+      
+      var tiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+      });  
+      
+      tiles.addTo(map);
+        
+     
+   
+   /* L.geoJson(shootings, {
+        pointToLayer: function(feature, latlng){
+            console.log(feature);
+            return L.circle(latlng, 0);
+        }
+    }).addTo(map)*/
+        
+      var homicideLayers =  L.geoJson(shootings, {
+            pointToLayer: function(feature, latlng){
+                
+                return L.circleMarker(latlng, {
+                                      color:'purple',
+                                    weight: 1,
+                                   fillColor: 'purple',
+                                   fillOpacity: .8,
+                                     radius :   4
+                
+                
+                                      
+                                      
+            });
+            
+        },
+ 
+            filter :function(feature, latlng){
+                if(feature.properties.code <='0199'){
+                    return feature;}
+                
+            },
+            onEachFeature : function(feature,layer) {
+     
+      layer.on('click',function(){
+       
+          layer.bindPopup("<b>Block</b><br>" + feature.properties.location
+        +"<br><br><b>Code</b><br> Homicide with a Firearm<br><br><b>Gunshot Wound Location</b><br>"+feature.properties.wound.toLocaleString()).openPopup()
+           });
+           }
+       }).addTo(map);
+//        
+       var robberyLayers  =   L.geoJson(shootings, {
+            pointToLayer: function(feature, latlng){
+                return L.circleMarker(latlng, {
+                                      color:'#ff0000',
+                                    weight: 1,
+                                   fillColor: '#ff4000',
+                                   fillOpacity: .8,
+                                     radius : 4
+                
+                
+                });
+                                      
+            
+            
+        },
+ 
+           
+            
+       
+ 
+              filter: function (feature, layer) {
+         if(feature.properties.code >="0300" && feature.properties.code <= "0399"){
+             return feature;}
+     },
+        
+            onEachFeature : function(feature,layer) {
+     
+   layer.on('click',function(){
+       layer.bindPopup("<b>Block</b><br>" + feature.properties.location
+        +"<br><br><b>Code</b><br>Robbery with a Firearm<br><br><b>Gunshot Wound Location</b><br>"+feature.properties.wound .toLocaleString()).openPopup()
+   })
+        ;
+          
+}
+     
+
+ }).addTo(map);
+         
+   
+     
+        var assaultLayers   =         L.geoJson(shootings, {
+            pointToLayer: function(feature, latlng){
+              return L.circleMarker(latlng, {
+                                      color:'#808080',
+                                    weight: 1,
+                                   fillColor: 'lime',
+                                   fillOpacity: .8,
+                                  radius :  4
+               
+                                     
+                                     
+            });
+            
+        },
+ 
+             filter: function (feature, layer) {
+         if(feature.properties.code >="0400" && feature.properties.code <= "0499"){
+             return feature;}
+            },
+            
+         onEachFeature : function(feature,layer) {
+     
+   layer.on('click',function(){
+       layer.bindPopup("<b>Block</b><br>" + feature.properties.location
+        +"<br><br><b>Code</b><br>Assault with a Firearm<br><br><b>Gunshot Wound Location</b><br>"+feature.properties.wound.toLocaleString()).openPopup()
+   })
+        ;  
+}
+}).addTo(map);
+        
+              
+   var sourcesLayers = {
+       "<b style = 'color: purple'>   Homicide</b>": homicideLayers,
+        "<b style = 'color:  #ff4000'>   Robbery</b>": robberyLayers,
+       "<b style = 'color:  lime'>   Assault</b>": assaultLayers,
+       
+                       };
+        
+   L.control.layers(null, sourcesLayers, { collapsed: false }).addTo(map);
+        
+       
+                        
+                            
+                            
+        
+        
+        
+    </script>
+    
+    
+    
+</body>
+
+</html>
